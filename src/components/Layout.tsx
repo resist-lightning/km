@@ -139,7 +139,7 @@ export default function Layout() {
         {/* Logo */}
         <div className="h-16 flex items-center px-4 border-b border-[hsl(var(--sidebar-border))]">
           <div className="w-9 h-9 rounded-lg shrink-0 overflow-hidden bg-white/10">
-            <img src="./logo.png" alt="国民养老保险" className="w-full h-full object-contain" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="国民养老保险" className="w-full h-full object-contain" />
           </div>
           <AnimatePresence>
             {sidebarOpen && (

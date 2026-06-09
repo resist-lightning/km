@@ -94,7 +94,7 @@ export default function Dashboard() {
       {/* Hero Banner */}
       <motion.div variants={itemVariants} className="relative overflow-hidden rounded-2xl gradient-hero text-white p-8">
         <div className="absolute inset-0 opacity-10">
-          <img src="./images/hero-bg.png" alt="" className="w-full h-full object-cover" />
+          <img src={`${import.meta.env.BASE_URL}images/hero-bg.png`} alt="" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10 flex items-center justify-between gap-8">
           <div className="flex-1">
@@ -161,7 +161,7 @@ export default function Dashboard() {
           {/* Header */}
           <div className="px-5 py-3 border-b border-[hsl(var(--border))] flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src="./images/ai-assistant-icon.png" alt="AI" className="w-full h-full object-cover" />
+              <img src={`${import.meta.env.BASE_URL}images/ai-assistant-icon.png`} alt="AI" className="w-full h-full object-cover" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-[hsl(var(--foreground))]">AI 智能助手</h2>
