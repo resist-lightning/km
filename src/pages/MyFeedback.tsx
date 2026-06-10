@@ -16,7 +16,6 @@ import {
   Bell,
   Stamp,
   Archive,
-  Activity,
 } from "lucide-react";
 
 /* ─── 动画 ─── */
@@ -51,13 +50,14 @@ interface ArticleComment {
   comments: Comment[];
 }
 
-interface DislikeRecord {
+interface FeedbackRecord {
   id: string;
   docTitle: string;
   reason: string;
   user: string;
   dept: string;
   time: string;
+  type: "like" | "dislike";
   autoTicket: boolean;
 }
 
@@ -130,13 +130,17 @@ const articleComments: ArticleComment[] = [
   },
 ];
 
-/* ─── Mock 数据：点踩记录（逆向反馈） ─── */
-const dislikeRecords: DislikeRecord[] = [
-  { id: "DS-001", docTitle: "年度绩效考核方案", reason: "内容过时，与现行制度不符", user: "王建国", dept: "运营管理部", time: "2026-06-09 10:20", autoTicket: true },
-  { id: "DS-002", docTitle: "第三方系统对接规范", reason: "缺少安全评审章节", user: "李智慧", dept: "信息技术部", time: "2026-06-08 16:45", autoTicket: true },
-  { id: "DS-003", docTitle: "客户服务话术手册", reason: "部分表述不准确", user: "陈思颖", dept: "客户服务部", time: "2026-06-08 09:10", autoTicket: true },
-  { id: "DS-004", docTitle: "养老保险业务操作手册（2026版）", reason: "知识老旧", user: "赵文博", dept: "战略发展部", time: "2026-06-07 14:00", autoTicket: true },
-  { id: "DS-005", docTitle: "文书档案管理制度", reason: "知识缺失", user: "孙晓梅", dept: "法律合规部", time: "2026-06-06 11:30", autoTicket: true },
+/* ─── Mock 数据：反馈记录（点赞+点踩） ─── */
+const feedbackRecords: FeedbackRecord[] = [
+  { id: "FB-001", docTitle: "年度绩效考核方案", reason: "内容详实，对实际工作帮助很大", user: "王建国", dept: "运营管理部", time: "2026-06-09 10:20", type: "like", autoTicket: false },
+  { id: "FB-002", docTitle: "第三方系统对接规范", reason: "接口说明清晰，接入效率提升明显", user: "李智慧", dept: "信息技术部", time: "2026-06-09 09:15", type: "like", autoTicket: false },
+  { id: "FB-003", docTitle: "客户服务话术手册", reason: "场景覆盖全面，新员工上手很快", user: "陈思颖", dept: "客户服务部", time: "2026-06-08 16:30", type: "like", autoTicket: false },
+  { id: "FB-004", docTitle: "数据分析周报模板V2.0", reason: "模板结构合理，直接可用", user: "周怡媛", dept: "战略发展部", time: "2026-06-08 11:00", type: "like", autoTicket: false },
+  { id: "FB-005", docTitle: "年度绩效考核方案", reason: "内容过时，与现行制度不符", user: "王建国", dept: "运营管理部", time: "2026-06-09 10:20", type: "dislike", autoTicket: true },
+  { id: "FB-006", docTitle: "第三方系统对接规范", reason: "缺少安全评审章节", user: "李智慧", dept: "信息技术部", time: "2026-06-08 16:45", type: "dislike", autoTicket: true },
+  { id: "FB-007", docTitle: "客户服务话术手册", reason: "部分表述不准确", user: "陈思颖", dept: "客户服务部", time: "2026-06-08 09:10", type: "dislike", autoTicket: true },
+  { id: "FB-008", docTitle: "养老保险业务操作手册（2026版）", reason: "知识老旧", user: "赵文博", dept: "战略发展部", time: "2026-06-07 14:00", type: "dislike", autoTicket: true },
+  { id: "FB-009", docTitle: "文书档案管理制度", reason: "知识缺失", user: "孙晓梅", dept: "法律合规部", time: "2026-06-06 11:30", type: "dislike", autoTicket: true },
 ];
 
 /* ─── Mock 数据：优化工单 ─── */
@@ -230,7 +234,7 @@ const docControlItems: DocControlItem[] = [
 type TabKey = "feedback" | "tickets" | "comments" | "doccontrol";
 
 const tabs: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: "feedback", label: "逆向反馈", icon: ThumbsDown },
+  { key: "feedback", label: "反馈", icon: ThumbsUp },
   { key: "tickets", label: "优化工单", icon: Wrench },
   { key: "comments", label: "文章评论", icon: MessageSquare },
   { key: "doccontrol", label: "文控管理", icon: ShieldCheck },
@@ -305,7 +309,7 @@ export default function MyFeedback() {
       <motion.div variants={itemVariants} className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">评论反馈</h1>
-          <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">文控管理 · 逆向反馈 · 优化工单 · 评论聚合</p>
+          <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">文控管理 · 反馈 · 优化工单 · 评论聚合</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
           <Bell className="w-4 h-4" />
@@ -316,7 +320,7 @@ export default function MyFeedback() {
       {/* Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "收到点踩", value: dislikeRecords.length.toString(), icon: ThumbsDown, color: "text-rose-500", sub: `${dislikeRecords.filter((d) => d.autoTicket).length} 个已自动生成工单` },
+          { label: "收到反馈", value: feedbackRecords.length.toString(), icon: ThumbsUp, color: "text-emerald-600", sub: `${feedbackRecords.filter((d) => d.type === "like").length} 点赞 · ${feedbackRecords.filter((d) => d.type === "dislike").length} 点踩` },
           { label: "待处理工单", value: pendingTickets.toString(), icon: Wrench, color: "text-amber-600", sub: "点踩触发，需Owner跟进" },
           { label: "未读评论", value: unreadComments.toString(), icon: MessageSquare, color: "text-sky-600", sub: "来自您的知识文档" },
           { label: "文控文档", value: docControlItems.length.toString(), icon: ShieldCheck, color: "text-[hsl(var(--navy-600))]", sub: "您负责的知识资产" },
@@ -360,26 +364,32 @@ export default function MyFeedback() {
 
         <div className="p-5">
           <AnimatePresence mode="wait">
-            {/* ─── 逆向反馈 ─── */}
+            {/* ─── 反馈 ─── */}
             {activeTab === "feedback" && (
               <motion.div key="feedback" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="space-y-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-rose-500" />
-                    <h3 className="font-bold text-[hsl(var(--foreground))]">逆向反馈记录</h3>
-                    <span className="text-xs text-[hsl(var(--muted-foreground))]">用户对您文档的点踩反馈，已自动关联优化工单</span>
+                    <ThumbsUp className="w-5 h-5 text-emerald-600" />
+                    <h3 className="font-bold text-[hsl(var(--foreground))]">反馈记录</h3>
+                    <span className="text-xs text-[hsl(var(--muted-foreground))]">用户对您文档的点赞与点踩反馈，点踩已自动关联优化工单</span>
                   </div>
                 </div>
                 <div className="divide-y divide-[hsl(var(--border))] border border-[hsl(var(--border))] rounded-xl overflow-hidden">
-                  {dislikeRecords.map((record) => (
+                  {feedbackRecords.map((record) => (
                     <div key={record.id} className="px-5 py-4 hover:bg-[hsl(var(--muted))] transition-colors">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                             <span className="text-xs font-medium text-[hsl(var(--muted-foreground))]">#{record.id}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200 font-medium flex items-center gap-1">
-                              <ThumbsDown className="w-3 h-3" /> 点踩
-                            </span>
+                            {record.type === "like" ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 font-medium flex items-center gap-1">
+                                <ThumbsUp className="w-3 h-3" /> 点赞
+                              </span>
+                            ) : (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200 font-medium flex items-center gap-1">
+                                <ThumbsDown className="w-3 h-3" /> 点踩
+                              </span>
+                            )}
                             {record.autoTicket && (
                               <span className="text-[10px] px-2 py-0.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200 font-medium flex items-center gap-1">
                                 <Wrench className="w-3 h-3" /> 已生成工单
@@ -387,7 +397,7 @@ export default function MyFeedback() {
                             )}
                           </div>
                           <div className="text-sm font-medium text-[hsl(var(--foreground))] mb-1">{record.docTitle}</div>
-                          <div className="text-xs text-[hsl(var(--muted-foreground))] mb-2">反馈原因：{record.reason}</div>
+                          <div className="text-xs text-[hsl(var(--muted-foreground))] mb-2">{record.type === "like" ? "反馈内容" : "反馈原因"}：{record.reason}</div>
                           <div className="flex items-center gap-4 text-[10px] text-[hsl(var(--muted-foreground))] flex-wrap">
                             <span className="flex items-center gap-1"><User className="w-3 h-3" /> {record.user}</span>
                             <span className="flex items-center gap-1"><Building className="w-3 h-3" /> {record.dept}</span>
@@ -395,9 +405,15 @@ export default function MyFeedback() {
                           </div>
                         </div>
                         <div className="shrink-0">
-                          <button className="text-[10px] px-3 py-1.5 rounded-lg bg-[hsl(var(--navy-600))] text-white hover:bg-[hsl(var(--navy-700))] transition-colors flex items-center gap-1">
-                            查看工单 <ChevronRight className="w-3 h-3" />
-                          </button>
+                          {record.type === "dislike" && record.autoTicket ? (
+                            <button className="text-[10px] px-3 py-1.5 rounded-lg bg-[hsl(var(--navy-600))] text-white hover:bg-[hsl(var(--navy-700))] transition-colors flex items-center gap-1">
+                              查看工单 <ChevronRight className="w-3 h-3" />
+                            </button>
+                          ) : (
+                            <span className="text-[10px] px-3 py-1.5 rounded-lg bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] flex items-center gap-1">
+                              {record.type === "like" ? "已收到" : "已记录"}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
